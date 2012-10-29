@@ -1,5 +1,5 @@
-#ifndef INC_FUNCTIONOBJECT_H
-#define INC_FUNCTIONOBJECT_H
+#ifndef INC_EVENTHANDLER_H
+#define INC_EVENTHANDLER_H
 
 
 class Event;
