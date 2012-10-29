@@ -3,7 +3,6 @@
     // define an event handler
 	EventHandler playerHitHandler;
 	
-
 	// bind a function to it		
 	playerHitHandler.bind<Game>(&Game::handleHit,this);
 	
@@ -12,7 +11,7 @@
 	
 	// dispatch the event
 	std::shared_ptr<PlayerEvent> event(new PlayerEvent(this));
-	dispatchEvent("hit",event.get());
+	player.dispatchEvent("hit",event.get());
 	
 	// the handler Game::handleHit will be called and passed the PlayerEvent
 	void handleHit(const Event* event) const
