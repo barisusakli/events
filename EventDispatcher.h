@@ -1,6 +1,5 @@
 
 
-
 #ifndef INC_EVENTDISPATCHER_H
 #define INC_EVENTDISPATCHER_H
 
@@ -56,9 +55,9 @@ public:
 		if(it != _handlers.end())
 		{
 			auto &v = it->second;
+			event.target = this;
 			for (auto eventHandler : v)
 			{
-				event.target = this;
 				(*eventHandler)(event);
 			}
 		}
