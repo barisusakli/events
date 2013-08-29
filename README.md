@@ -1,24 +1,42 @@
 #Usage
 
-    // define an event handler
-	EventHandler playerHitHandler;
-	
-	// bind a function to it		
-	playerHitHandler.bind<Game>(&Game::handleHit,this);
-	
-	// add the handler to a class that inherits EventDispatcher	
-	player.addHandler("hit",playerHitHandler);
-	
-	// dispatch the event
-	std::shared_ptr<PlayerEvent> event(new PlayerEvent(this));
-	player.dispatchEvent("hit",event.get());
-	
-	// the handler Game::handleHit will be called and passed the PlayerEvent
-	void handleHit(const Event* event) const
+    //Create a class that derives from EventDispatcher
+	class Player : public EventDispatcher
 	{
-		const PlayerEvent* e = dynamic_cast<const PlayerEvent*>(event);
-		std::cout<<"Player Hit Handler Health ["<<e->player->health<<"]"<<std::endl;
+	
+	};
+	
+	//Create a class that has a function
+	class Game
+	{
+	public:
+		void event1Handler(Event& ev){}		
+	};
+	
+	// free functions also work
+	void event2Handler(Event& ev){}
+	
+	int main() {
+	  Player player;
+	  MyGame handler;	
+	
+	  //addHandler returns a shared_ptr to the std::function
+	  EventHandlerPtr eventHandler1 = player.addHandler("event1", &MyGame::event1Handler, handler);
+	  player.addHandler("event2", &event2Handler);
+		
+	  // dispatching events will call the member function and the free function
+	  player.dispatchEvent(Event("event1"));
+	  player.dispatchEvent(Event("event2"));
+      
+	  // you can remove a handler using the shared_ptr returned from addHandler
+	  player.removeHandler("event1", eventHandler1);
+      
+	  // dispatching again will only call event2Handler since eventHandler1 is removed
+	  player.dispatchEvent(Event("event1"));
+	  player.dispatchEvent(Event("event2"));
+	
+	  return 0;
 	}
 	
-	//to remove and event call removeHandler and pass the EventHandler object
-	player.removeHandler("hit",playerHitHandler);
+	
+	

@@ -10,23 +10,38 @@
 #include <string>
 #include <memory>
 
-#include "EventHandler.h"
+#include "Event.h"
+
+typedef std::function<void(Event&)> EventHandler;
+typedef std::shared_ptr<EventHandler> EventHandlerPtr;
 
 class EventDispatcher
 {
 public:
 
-	void addHandler(const std::string& type,EventHandler& handler)
+	template<class T, class G>
+	EventHandlerPtr addHandler(const std::string& type, T&& handlerFunc, G& handlerObject)
 	{
-		if(!handler.isBound())
-			return;
-		_handlers[type].push_back(handler);
+		EventHandlerPtr ptr = std::make_shared<EventHandler>(std::bind(handlerFunc, handlerObject, std::placeholders::_1));		
+		
+		_handlers[type].push_back(ptr);
+		return ptr;
 	}
 
-	void removeHandler(const std::string& type,EventHandler& handler)
+	template<class T>
+	EventHandlerPtr addHandler(const std::string& type, T&& handlerFunc)
+	{
+		EventHandlerPtr ptr = std::make_shared<EventHandler>(std::bind(handlerFunc, std::placeholders::_1));		
+		
+		_handlers[type].push_back(ptr);
+		return ptr;
+	}
+
+	void removeHandler(const std::string& type, EventHandlerPtr handler)
 	{
 		auto &v = _handlers[type];
-		auto it = std::find(v.begin(),v.end(),handler);
+		
+		auto it = std::find(v.begin(), v.end(), handler);
 		
 		if(it != v.end()) {
 			v.erase(it);
@@ -35,21 +50,23 @@ public:
 		}		
 	}
 	
-	void dispatchEvent(const std::string& type,const Event* event) const
+	void dispatchEvent(Event& event) 
 	{
-		auto it = _handlers.find(type);
+		auto it = _handlers.find(event.type);
 		if(it != _handlers.end())
 		{
 			auto &v = it->second;
 			for (auto eventHandler : v)
 			{
-				eventHandler(*this,event);
+				event.target = this;
+				(*eventHandler)(event);
 			}
 		}
 	}
-
+	
 private:
-	std::map<std::string,std::vector<EventHandler>> _handlers;
+
+	std::map<std::string,std::vector<EventHandlerPtr>> _handlers;
 };
 
 #endif

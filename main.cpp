@@ -1,70 +1,59 @@
 #include <functional>
 #include <iostream>
- 
+#include <vector>
+#include <sstream>
+
 #include "EventDispatcher.h"
-#include "PlayerEvent.h"
 
-
-class Player: public EventDispatcher
+class MyGame
 {
 public:
-	Player():health(100){}
+	MyGame():game(1){}
 
-	int health;
-
-	void hit()
+	void event1Handler(Event& event)
 	{
-		health -= 5;
-		std::shared_ptr<PlayerEvent> event(new PlayerEvent(this));
-		dispatchEvent("hit",event.get());
+		std::cout<<"Event received "<<event.type <<", target "<<event.target<<"\n";
 	}
+	
+	int game;
 };
 
-class Game
+
+class Player : public EventDispatcher
 {
 public:
-	EventHandler playerHitHandler;
-	EventHandler playerHitHandler2;
-
-	void init(Player& player)
-	{
-		
-		playerHitHandler.bind<Game>(&Game::handleHit,this);
-		playerHitHandler2.bind<Game>(&Game::handleHit2,this);
-		
-		player.addHandler("hit",playerHitHandler);
-		player.addHandler("hit",playerHitHandler2);
-
-	}
-
-	void handleHit(const Event* event) const
-	{
-		const PlayerEvent* e = dynamic_cast<const PlayerEvent*>(event);
-		std::cout<<"Player Hit Handler Health ["<<e->player->health<<"]"<<std::endl;
-	}
-
-	void handleHit2(const Event* event) const
-	{
-		const PlayerEvent* e = dynamic_cast<const PlayerEvent*>(event);
-		std::cout<<"Player Hit Handler 2 Health ["<<e->player->health<<"]"<<std::endl;
-	}
+	Player():a(5),b(3) {}
+	
+private:
+	int a;
+	int b;
 };
+
+void event2Handler(Event& event)
+{	
+	std::cout<<"Event received "<<event.type <<", target "<<event.target<<"\n";
+}
+
 
 int main()
 {
+	Player player;
+	MyGame handler;	
+		
+	EventHandlerPtr eventHandler1 = player.addHandler("event1", &MyGame::event1Handler, handler);
+	EventHandlerPtr eventHandler2 = player.addHandler("event2", &event2Handler);
+		
 
-	Player p;
-	Game g;
+	player.dispatchEvent(Event("event1"));
+	player.dispatchEvent(Event("event2"));
 
-	g.init(p);
-	
-    p.hit();
-	p.hit();
-	p.removeHandler("hit",g.playerHitHandler);
-	p.hit();
+	player.removeHandler("event1", eventHandler1);
 
-	int value;
-	std::cin>>value;
+	player.dispatchEvent(Event("event1"));
+	player.dispatchEvent(Event("event2"));
+
+	std::string word;
+	std::cin>>word;
 	return 0;
 }
 
