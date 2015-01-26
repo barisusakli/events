@@ -18,10 +18,10 @@
 	
 	int main() {
 	  Player player;
-	  MyGame handler;	
+	  Game handler;	
 	
 	  //addHandler returns a shared_ptr to the std::function
-	  EventHandlerPtr eventHandler1 = player.addHandler("event1", &MyGame::event1Handler, handler);
+	  EventHandlerPtr eventHandler1 = player.addHandler("event1", &Game::event1Handler, handler);
 	  player.addHandler("event2", &event2Handler);
 		
 	  // dispatching events will call the member function and the free function
